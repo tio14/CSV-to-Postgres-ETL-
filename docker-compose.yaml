@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:latest
+    ports:
+      - '5433:5432'
+    networks:
+      - etl_network
+    environment:
+      POSTGRES_DB: cad-it-db
+      POSTGRES_USER: cad-it
+      POSTGRES_PASSWORD: c4d-1t!23
+    volumes:
+      - ./db_init/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  etl_script:
+    build:
+      context: ./etl_script # Directory containing the Dockerfile and elt_script.py
+      dockerfile: Dockerfile # Name of the Dockerfile, if it's something other than "Dockerfile", specify here
+    command: ['python', 'etl_script.py']
+    networks:
+      - etl_network
+    depends_on:
+      - postgres
+
+networks:
+  etl_network:
+    driver: bridge
